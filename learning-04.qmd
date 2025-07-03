@@ -13,15 +13,17 @@ Learning reflections are part of your weekly homework and have a weight of 20% o
 
 # Lecture
 
-<!--# Add your reflections on the lecture of this week here -->
+This lecture was very informative. I will certainly be using many of these skills in my practicum assignment, which I am using as my Capstone Project. I want to get more comfortable with the functions that remove ‘na’ because a lot of my data will have wholes in it.
 
 # Homework Assignment
 
-<!--# Add your reflections on the homework programming assignment here -->
+This was an especially helpful homework. I expect to be using mutate() select() and group_by() a lot, so it was nice to get some exposure to writing it myself while also having your solutions on the other file. I also think gt() will be very helpful for my data visualization and I would like to understand it better.
 
 # Readings
 
-<!--# Add your reflections on the required readings here -->
+[R for Data Science – Data Transformation:]{.underline} It was nice to have the different variable types explained at the beginning as well as revisiting the dplyr basics. The examples of filtering for ‘na’ as well as the helper functions within select() were also helpful and I will certainly be revisiting later in my data analysis.
+
+[Excuse Me, Do You Have a Moment to Talk About Version Control?]{.underline} : I did not know Git was built to be a version control system. “Recall that a repository or repo is just a directory of files that Git manages holistically. A commit functions like a snapshot of all the files in the repo, at a specific moment.” This paper helped explain some of the functions and purpose of Github, but I am still a bit fuzzy on how posit.cloud comes into play. My understanding is posit.cloud is where we do the editing in R, and Github is like our storage base for our projects as we iterate and work on them. I am not supe confident in that understanding though.
 
 # Submit learning reflections
 
