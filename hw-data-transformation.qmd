@@ -36,6 +36,7 @@ Follow these steps to import the data:
 3.  Render and fix any errors
 
 ```{r}
+global_waste_data <- read_csv("data/country_level_data_0.csv")
 
 ```
 
@@ -55,6 +56,8 @@ Follow these steps to select specific variables:
 2.  Run the code contained in the code chunk and fix any errors
 
 ```{r}
+part1_idk <- global_waste_data |> 
+  select(iso3c, ends_with("percent"))
 
 ```
 
@@ -75,6 +78,13 @@ Follow these steps to select specific variables:
 3.  Render and fix any errors
 
 ```{r}
+
+composition <- global_waste_data |> 
+  select(country_name, 
+         income_id, 
+         total_msw_total_msw_generated_tons_year, 
+         population_population_number_of_people, 
+         starts_with("composition"))
 
 ```
 
@@ -97,6 +107,18 @@ Follow these steps to select specific variables:
 5.  Render and fix any errors
 
 ```{r}
+composition_tidy <- composition |> 
+  rename(food_organic_waste = composition_food_organic_waste_percent,
+         glass = composition_glass_percent,
+         metal = composition_metal_percent,
+         other = composition_other_percent,
+         paper_cardboard = composition_paper_cardboard_percent,
+         plastic = composition_plastic_percent,
+         rubber_leather = composition_rubber_leather_percent,
+         wood = composition_wood_percent,
+         yard_garden_green_waste = composition_yard_garden_green_waste_percent,
+         msw_tons_year = total_msw_total_msw_generated_tons_year,
+         population = population_population_number_of_people)
 
 ```
 
@@ -111,6 +133,8 @@ Follow these steps to filter for missing data:
 1.  Use the `filter()` function in combination with `is.na()` to create a subset from `composition_tidy` containing observations for countries with missing data for the variable named food_organic_waste
 
 ```{r}
+subset_na_food_organic_waste <- composition_tidy |> 
+  filter(is.na(food_organic_waste))
 
 ```
 
@@ -121,7 +145,8 @@ Follow these steps to filter for missing data:
 1.  Use the `filter()` to create a subset from `composition_tidy` containing observations for countries classified as high-income countries (HIC).
 
 ```{r}
-
+subset_HIC <- composition_tidy |> 
+  filter(income_id == "HIC")
 ```
 
 ### Part 3
@@ -131,6 +156,9 @@ Follow these steps to filter for missing data:
 1.  Use the `filter()` to create a subset from `composition_tidy` containing observations for countries that are not classified as low-income countries (LIC).
 
 ```{r}
+
+subset_not_LIC <- composition_tidy |> 
+  filter(income_id != "LIC")
 
 ```
 
@@ -142,6 +170,9 @@ Follow these steps to filter for missing data:
 
 ```{r}
 
+subset_HIC_foodandwastegreaterthan_50percent <- composition_tidy |> 
+  filter(income_id == "HIC" & food_organic_waste > 50)
+
 ```
 
 ### Part 5
@@ -151,7 +182,9 @@ Follow these steps to filter for missing data:
 1.  Create a subset from `composition_tidy` containing observations for countries classified as high-income countries or low-income countries and with other waste composition greater than 40%.
 
 ```{r}
-
+subset_HICandLIC_othergreaterthan_50percent <- composition_tidy |> 
+  filter(income_id == "LIC" | income_id == "HIC",
+         other > 40 )
 ```
 
 ### Part 6
@@ -163,7 +196,8 @@ Follow these steps to filter for missing data:
 2.  Render and fix any errors
 
 ```{r}
-
+subset_part6 <- composition_tidy |> 
+  filter(country_name %in%  c("Switzerland", "Ghana", "Kenya", "Turkey", "Nepal", "United States"))
 ```
 
 ## dplyr::mutate() & dplyr::relocate()
@@ -180,6 +214,10 @@ Follow these steps to filter for missing data:
 
 ```{r}
 
+composition_tidy_capita <- composition_tidy |> 
+  mutate(msw_capita_kg_year = msw_tons_year / population * 1000) |> 
+  relocate(msw_capita_kg_year, .after = msw_tons_year)
+
 ```
 
 ## dplyr::mutate() & dplyr::case_when()
@@ -190,11 +228,11 @@ In class, we have not yet looked at the `case_when()` function. Use the exercise
 
 2.  What does the combination of `mutate()` and `case_when()` do?
 
-<!--# Remove this comment and use your own words to answer the question -->
+The mutate() function creates a new column or variable, while case_when() sets specific paramters inside the mutate function. It says that within the income_id column, when a value is set to LIC or HIC or whatever it is, make the corresponding value in income_cat column be the ful spelling of the income Ids. It is setting up parameters for creating the new column.
 
 3.  How is the object `levels_income_cat` used and what does it achieve?
 
-<!--# Remove this comment and use your own words to answer the question -->
+levels_income_cat is a vector containing the new income descriptions. It is defining specific orders to the levels, like ranking them from highest to lowest in the "levels = levels_income_cat" line.
 
 ```{r}
 #| eval: false 
@@ -238,10 +276,12 @@ Follow these steps to summarise the data:
 
 3.  Describe what the resulting table that you can see in the Console shows you.
 
-<!--# Remove this comment and use your own words to answer the question -->
+The resulting table shows me how many of each country, the count, are in each income group.
 
 ```{r}
-
+composition_tidy_capita_income_cat |> 
+  group_by(income_id) |> 
+  summarize(count = n())
 ```
 
 **Write the code yourself**
@@ -250,10 +290,12 @@ Follow these steps to summarise the data:
 
 2.  Observe the output in the Console and describe the difference to the resulting table of the previous code chunk.
 
-<!--# Remove this comment and use your own words to answer the question -->
+The difference between this table and the last is that the descriptions hae changed from the abbreviated versions ("LIC" "HIC" and so on) to their written forms from the income_cat object. The new table also goes in order form highest to lowest income, while the previous table had no clear ranking.
 
 ```{r}
-
+composition_tidy_capita_income_cat |> 
+  group_by(income_cat) |> 
+  summarize(count = n())
 ```
 
 Follow these steps to create a summary with mean values:
@@ -269,6 +311,22 @@ Follow these steps to create a summary with mean values:
 5.  Execute the code and observe the output in the Console. What has changed? How is that different to adding `na.rm = TRUE` as an argument to the `mean()` ?
 
 ```{r}
+composition_tidy_capita_income_cat |> 
+  group_by(income_cat) |> 
+  summarize(count = n(),
+  mean_msw_total <- mean(msw_capita_kg_year))
+```
+
+It removed the na from the high income category, so now there are 79 count instead of 81.
+
+```{r}
+composition_tidy_capita_income_cat |> 
+  tidyr::drop_na(msw_capita_kg_year) |> 
+  group_by(income_cat) |> 
+  summarise(
+    count = n(),
+    mean_msw_total = mean(msw_capita_kg_year)
+  )
 
 ```
 
@@ -281,7 +339,13 @@ Follow these steps to create a summary with mean values:
 3.  Store the summary table as a new object in your environment with the name `table_msw_generation`
 
 ```{r}
-
+table_msw_generation <- composition_tidy_capita_income_cat |> 
+  tidyr::drop_na(msw_capita_kg_year) |> 
+  group_by(income_cat) |> 
+  summarize(count = n(),
+            mean(msw_capita_kg_year),
+            median(msw_capita_kg_year),
+            sd(msw_capita_kg_year))
 ```
 
 **Write the code yourself**
@@ -293,7 +357,19 @@ Follow these steps to create a summary with mean values:
 3.  Store the summary table as a new object in your environment with the name `table_composition`
 
 ```{r}
-
+#table_composition <- 
+composition_tidy_capita_income_cat |> 
+  tidyr::drop_na(c(msw_capita_kg_year,
+                   food_organic_waste,
+                   plastic,
+                   paper_cardboard)) |> 
+  group_by(income_cat) |> 
+  summarize(count = n(),
+            mean_msw_total = mean(msw_capita_kg_year),
+            mean_organic = mean(food_organic_waste),
+            mean_plastic = mean(plastic), 
+            mean_paper_cardboard = mean(paper_cardboard), 
+            )
 ```
 
 # Task 4: Data visualisations
@@ -373,11 +449,11 @@ The [`gt` R Package](https://gt.rstudio.com/index.html) is an extremely powerful
 1.  Execute the following two code chunks
 2.  Read the code, observe the output in the Viewer pane, and describe in your own words what each function does
 
--   `gt()`:
--   `tab_header()`:
--   `fmt_number()`:
--   `starts_with()`:
--   `cols_labels()`:
+-   `gt()`: Makes the table asthetically pleasing and easier to export
+-   `tab_header()`: allows to create your table header and subheader
+-   `fmt_number()`: selecting which columns to use and sets a decimal limit of 0.1
+-   `starts_with()`: gets every column that starts with (mean)
+-   `cols_labels()`: puts column titles associated with each variable grabbed
 
 ```{r}
 # As previously, I have stored the data that I would have expected for the 
@@ -419,8 +495,8 @@ Below is another table for the report that uses the `knitr` R Package to style t
 
 1.  Read the code and describe in your own words what each function does
 
--   `rename()`:
--   `knitr::kable()`:
+-   `rename()`: renames the columns to a more visually appealing output with spaces
+-   `knitr::kable()`: this automatically converts your data and descriptions into an attractive output
 
 ```{r}
 
